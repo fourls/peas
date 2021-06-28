@@ -10,7 +10,7 @@ pub struct ScreenPosition {
 
 #[derive(Component)]
 pub struct WorldPosition {
-    pub pos: Vec2<i32>,
+    pub pos: Vec2<f32>,
 }
 
 #[derive(Component)]

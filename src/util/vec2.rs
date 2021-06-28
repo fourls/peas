@@ -1,18 +1,49 @@
 use std::ops::{Add, AddAssign, Mul};
 
+use cgmath::AbsDiffEq;
+
 #[derive(Default, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub struct Vec2<T> {
     pub x: T,
     pub y: T,
 }
 
+impl<T> Vec2<T> {
+    pub fn new(x: T, y: T) -> Self {
+        Vec2 { x, y }
+    }
+}
+
 impl<T> Vec2<T>
 where
+    T: Mul<Output = T>,
     T: Add<Output = T>,
     T: Copy,
 {
-    pub fn new(x: T, y: T) -> Self {
-        Vec2 { x, y }
+    pub fn sqr_magnitude(&self) -> T {
+        self.x * self.x + self.y * self.y
+    }
+}
+
+impl<T> Vec2<T>
+where
+    T: Mul<Output = T>,
+    T: Add<Output = T>,
+    T: Copy,
+    T: Into<f32>,
+    T: From<f32>,
+{
+    pub fn magnitude(&self) -> f32 {
+        f32::sqrt(self.sqr_magnitude().into())
+    }
+
+    pub fn normalize(&mut self) {
+        let mag = self.magnitude();
+
+        if !mag.abs_diff_eq(&0.0, f32::EPSILON) {
+            self.x = (self.x.into() / mag).into();
+            self.y = (self.y.into() / mag).into();
+        }
     }
 }
 

@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
 
 use crate::{
     camera::Camera,
@@ -39,7 +42,7 @@ fn setup_ecs() -> World {
     world.register::<WorldPosition>();
     world.register::<WorldCollider>();
 
-    spawn::player(&mut world, (0, 0).into());
+    spawn::player(&mut world, Vec2::default());
 
     const BOUNDS: i32 = 2;
 
@@ -71,6 +74,7 @@ fn setup_ecs() -> World {
 
     world.insert::<Camera>(camera);
     world.insert::<Input>(Input::default());
+    world.insert::<Duration>(Duration::default());
 
     world
 }
@@ -85,6 +89,8 @@ pub fn run() -> Result<(), crow::Error> {
         &event_loop,
     )?;
     let spritesheet = Texture::load(&mut ctx, "./assets/sprites.png")?;
+
+    let mut last_frame = Instant::now();
 
     let mut ecs = setup_ecs();
 
@@ -107,7 +113,16 @@ pub fn run() -> Result<(), crow::Error> {
                 }
             }
             Event::MainEventsCleared => ctx.window().request_redraw(),
-            Event::RedrawRequested(_) => tick(&mut ctx, &spritesheet, &mut ecs),
+            Event::RedrawRequested(_) => {
+                {
+                    let mut delta = ecs.write_resource::<Duration>();
+                    let now = Instant::now();
+                    *delta = now - last_frame;
+                    last_frame = now;
+                }
+
+                tick(&mut ctx, &spritesheet, &mut ecs)
+            }
             _ => {}
         },
     )
@@ -154,16 +169,15 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
     for (sprite, pos) in (&sprites, &world_positions).join() {
         let tex = spritesheet.get_section(sprite.section.pos(), sprite.section.size());
 
-        let cam_pos = camera.screen_to_view(
-            &camera.world_to_screen(&Vec2::new(pos.pos.x as i32, pos.pos.y as i32)),
-        );
+        let cam_pos =
+            camera.screen_to_view(&camera.world_to_screen(&Vec2::new(pos.pos.x, pos.pos.y)));
 
         ctx.draw(
             &mut surf,
             &tex,
             (
-                (cam_pos.x - sprite.anchor.x as i32) * SCALE_FACTOR as i32,
-                (cam_pos.y - sprite.anchor.y as i32) * SCALE_FACTOR as i32,
+                ((cam_pos.x - sprite.anchor.x as f32) * SCALE_FACTOR as f32) as i32,
+                ((cam_pos.y - sprite.anchor.y as f32) * SCALE_FACTOR as f32) as i32,
             ),
             &DrawConfig {
                 scale: (SCALE_FACTOR, SCALE_FACTOR),

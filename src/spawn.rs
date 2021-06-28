@@ -2,7 +2,7 @@ use crate::components::*;
 use crate::util::*;
 use specs::prelude::*;
 
-pub fn player(world: &mut World, pos: Vec2<i32>) {
+pub fn player(world: &mut World, pos: Vec2<f32>) {
     world
         .create_entity()
         .with(Player {})
@@ -27,6 +27,7 @@ pub fn tile(world: &mut World, tile_type: TileType, coords: Vec2<i32>) {
     use TileType::*;
 
     let pos = coords * crate::TILE_SIZE as i32;
+    let pos_f32 = Vec2::new(pos.x as f32, pos.y as f32);
 
     world
         .create_entity()
@@ -47,7 +48,7 @@ pub fn tile(world: &mut World, tile_type: TileType, coords: Vec2<i32>) {
             anchor: Vec2::new(16, 8),
             layer: 1,
         })
-        .with(WorldPosition { pos })
+        .with(WorldPosition { pos: pos_f32 })
         .with(WorldCollider {
             rect: Rect::square(pos.x, pos.y, crate::TILE_SIZE as i32),
         })
