@@ -1,4 +1,7 @@
 use crate::components::*;
+use crate::spawn::{self, TileType};
+use crate::systems;
+use crow::glutin::dpi::LogicalSize;
 use crow::glutin::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
@@ -15,26 +18,27 @@ fn setup_ecs() -> World {
 
     world.register::<Sprite>();
     world.register::<Position>();
+    world.register::<TilePosition>();
 
-    world
-        .create_entity()
-        .with(Sprite {
-            offset: (32, 80),
-            size: (16, 16),
-            anchor: (8, 8),
-        })
-        .with(Position { x: 2, y: 2 })
-        .build();
+    spawn::player(&mut world, (0, 0));
+    spawn::tile(&mut world, TileType::Grass, (0, 0));
+    spawn::tile(&mut world, TileType::Grass, (0, 1));
+    spawn::tile(&mut world, TileType::Cobble, (1, 0));
+    spawn::tile(&mut world, TileType::Grass, (1, 1));
+    spawn::tile(&mut world, TileType::Soil, (-1, 0));
 
     world
 }
 
 pub fn run() -> Result<(), crow::Error> {
     let event_loop = EventLoop::new();
-    let mut ctx = Context::new(WindowBuilder::new(), &event_loop)?;
+    let mut ctx = Context::new(
+        WindowBuilder::new().with_inner_size(LogicalSize::new(400, 400)),
+        &event_loop,
+    )?;
     let spritesheet = Texture::load(&mut ctx, "./assets/sprites.png")?;
 
-    let ecs = setup_ecs();
+    let mut ecs = setup_ecs();
 
     event_loop.run(
         move |event: Event<()>, _window_target: _, control_flow: &mut ControlFlow| match event {
@@ -43,10 +47,18 @@ pub fn run() -> Result<(), crow::Error> {
                 ..
             } => *control_flow = ControlFlow::Exit,
             Event::MainEventsCleared => ctx.window().request_redraw(),
-            Event::RedrawRequested(_) => draw(&mut ctx, &spritesheet, &ecs),
+            Event::RedrawRequested(_) => tick(&mut ctx, &spritesheet, &mut ecs),
             _ => {}
         },
     )
+}
+
+fn tick(ctx: &mut Context, spritesheet: &Texture, world: &mut World) {
+    systems(world);
+
+    world.maintain();
+
+    draw(ctx, spritesheet, world);
 }
 
 fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
@@ -67,10 +79,10 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
     let positions = world.read_storage::<Position>();
 
     for (sprite, pos) in (&sprites, &positions).join() {
-        let tex = spritesheet.get_section(sprite.offset, sprite.size);
+        let tex = spritesheet.get_section(sprite.section.pos(), sprite.section.size());
 
-        let x = pos.x + sprite.anchor.0 as i32;
-        let y = pos.y + sprite.anchor.1 as i32;
+        let x = pos.x - sprite.anchor.0 as i32;
+        let y = pos.y - sprite.anchor.1 as i32;
 
         ctx.draw(
             &mut surf,
@@ -78,10 +90,15 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
             (x * SCALE_FACTOR as i32, y * SCALE_FACTOR as i32),
             &DrawConfig {
                 scale: (SCALE_FACTOR, SCALE_FACTOR),
+                depth: Some((u8::MAX - sprite.layer) as f32 / u8::MAX as f32),
                 ..Default::default()
             },
         );
     }
 
     ctx.present(surf).unwrap();
+}
+
+fn systems(world: &mut World) {
+    systems::TilePositionUpdateSystem {}.run_now(world);
 }
