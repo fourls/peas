@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul};
+use std::ops::{Add, AddAssign, Mul};
 
 #[derive(Default, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub struct Vec2<T> {
@@ -38,5 +38,29 @@ where
 
     fn mul(self, rhs: X) -> Self::Output {
         Vec2::new(self.x * rhs, self.y * rhs)
+    }
+}
+
+impl<X> Add for Vec2<X>
+where
+    X: Add<Output = X>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl<X> AddAssign for Vec2<X>
+where
+    X: Add<Output = X>,
+    X: Copy,
+{
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
     }
 }

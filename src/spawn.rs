@@ -5,6 +5,7 @@ use specs::prelude::*;
 pub fn player(world: &mut World, pos: Vec2<i32>) {
     world
         .create_entity()
+        .with(Player {})
         .with(Sprite {
             section: Rect::square(32, 80, 16),
             anchor: Vec2::new(8, 3),

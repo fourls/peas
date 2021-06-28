@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
-use crow::glutin::event::{ElementState as KeyState, VirtualKeyCode as Key};
+use crow::glutin::event::ElementState as KeyState;
 
+pub use crow::glutin::event::VirtualKeyCode as Key;
 #[derive(Default)]
 pub struct Input {
     down: HashSet<Key>,

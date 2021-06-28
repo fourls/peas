@@ -34,6 +34,7 @@ fn setup_ecs() -> World {
     };
 
     world.register::<Sprite>();
+    world.register::<Player>();
     world.register::<ScreenPosition>();
     world.register::<WorldPosition>();
     world.register::<WorldCollider>();
@@ -175,4 +176,6 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
     ctx.present(surf).unwrap();
 }
 
-fn systems(world: &mut World) {}
+fn systems(world: &mut World) {
+    systems::PlayerMovementSystem::default().run_now(world);
+}
