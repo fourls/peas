@@ -1,17 +1,22 @@
 use std::collections::HashMap;
 
-use crate::camera::Camera;
-use crate::components::*;
-use crate::spawn::{self, TileType};
-use crate::systems;
-use crate::util::Vec2;
-use crow::glutin::dpi::LogicalSize;
-use crow::glutin::{
-    event::{Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
-    window::WindowBuilder,
+use crate::{
+    camera::Camera,
+    components::*,
+    input::Input,
+    spawn::{self, TileType},
+    systems,
+    util::Vec2,
 };
-use crow::{Context, DrawConfig, Texture};
+use crow::{
+    glutin::{
+        dpi::LogicalSize,
+        event::{Event, WindowEvent},
+        event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
+        window::WindowBuilder,
+    },
+    Context, DrawConfig, Texture,
+};
 use specs::prelude::*;
 
 const CLEAR_COLOR: (f32, f32, f32, f32) = (0.7, 0.7, 0.7, 1.0);
@@ -64,6 +69,7 @@ fn setup_ecs() -> World {
     }
 
     world.insert::<Camera>(camera);
+    world.insert::<Input>(Input::default());
 
     world
 }
@@ -87,6 +93,18 @@ pub fn run() -> Result<(), crow::Error> {
                 event: WindowEvent::CloseRequested,
                 ..
             } => *control_flow = ControlFlow::Exit,
+            Event::WindowEvent {
+                event: WindowEvent::KeyboardInput { input, .. },
+                ..
+            } => {
+                if let Some(key) = input.virtual_keycode {
+                    let state = input.state;
+
+                    let mut input_res = ecs.write_resource::<Input>();
+
+                    input_res.process_event(key, state);
+                }
+            }
             Event::MainEventsCleared => ctx.window().request_redraw(),
             Event::RedrawRequested(_) => tick(&mut ctx, &spritesheet, &mut ecs),
             _ => {}
@@ -97,6 +115,7 @@ pub fn run() -> Result<(), crow::Error> {
 fn tick(ctx: &mut Context, spritesheet: &Texture, world: &mut World) {
     systems(world);
 
+    world.write_resource::<Input>().frame_end();
     world.maintain();
 
     draw(ctx, spritesheet, world);

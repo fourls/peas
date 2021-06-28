@@ -1,6 +1,7 @@
 mod app;
 mod camera;
 mod components;
+mod input;
 mod spawn;
 mod systems;
 mod util;
