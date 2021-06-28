@@ -1,3 +1,6 @@
+mod app;
+mod components;
+
 fn main() {
-    println!("Hello, world!");
+    app::run().unwrap();
 }
