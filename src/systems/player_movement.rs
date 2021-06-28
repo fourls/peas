@@ -41,7 +41,21 @@ impl<'s> System<'s> for PlayerMovementSystem {
 
             axis.normalize();
 
-            position.pos += axis * crate::PLAYER_SPEED * delta.as_secs_f32();
+            let new_pos: Vec2<f32> =
+                position.pos + axis * crate::PLAYER_SPEED * delta.as_secs_f32();
+
+            let mut safe = true;
+
+            for collider in (&colliders).join() {
+                if collider.rect.inside(new_pos) {
+                    safe = false;
+                    break;
+                }
+            }
+
+            if safe {
+                position.pos = new_pos;
+            }
         }
     }
 }

@@ -61,13 +61,19 @@ fn setup_ecs() -> World {
         for y in -BOUNDS..=BOUNDS {
             let pos = Vec2::new(x, y);
 
+            let tile_type = match tile_overrides.get(&pos) {
+                None => TileType::Grass,
+                Some(tile_type) => tile_type.clone(),
+            };
+
             spawn::tile(
                 &mut world,
-                match tile_overrides.get(&pos) {
-                    None => TileType::Grass,
-                    Some(tile_type) => tile_type.clone(),
-                },
+                tile_type,
                 pos,
+                match tile_type {
+                    TileType::Water => true,
+                    _ => false,
+                },
             );
         }
     }

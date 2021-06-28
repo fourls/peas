@@ -22,7 +22,7 @@ pub struct Sprite {
 
 #[derive(Component)]
 pub struct WorldCollider {
-    pub rect: Rect<i32>,
+    pub rect: Rect<f32>,
 }
 
 #[derive(Component)]

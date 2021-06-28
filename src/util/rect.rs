@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Mul, Sub};
 
 use super::Vec2;
 
@@ -14,7 +14,6 @@ impl<T> Rect<T>
 where
     T: Add<Output = T>,
     T: Copy,
-    T: Ord,
 {
     pub fn rect(x: T, y: T, width: T, height: T) -> Self {
         Rect {
@@ -53,10 +52,37 @@ where
         (self.width, self.height)
     }
 
-    pub fn inside(&self, point: Vec2<T>) -> bool {
+    pub fn inside(&self, point: Vec2<T>) -> bool
+    where
+        T: PartialOrd,
+    {
         point.x >= self.left()
             && point.y >= self.bottom()
             && point.x <= self.right()
             && point.y <= self.top()
+    }
+}
+
+impl<T> Rect<T>
+where
+    T: Sub<Output = T>,
+    T: Add<Output = T>,
+    T: Copy,
+{
+    pub fn expand(&self, amount: T) -> Self {
+        Self {
+            x: self.x - amount,
+            y: self.y - amount,
+            width: self.width + amount + amount,
+            height: self.height + amount + amount,
+        }
+    }
+    pub fn shrink(&self, amount: T) -> Self {
+        Self {
+            x: self.x + amount,
+            y: self.y + amount,
+            width: self.width - amount - amount,
+            height: self.height - amount - amount,
+        }
     }
 }

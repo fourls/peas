@@ -8,7 +8,7 @@ pub fn player(world: &mut World, pos: Vec2<f32>) {
         .with(Player {})
         .with(Sprite {
             section: Rect::square(32, 80, 16),
-            anchor: Vec2::new(8, 3),
+            anchor: Vec2::new(8, 1),
             layer: 5,
         })
         .with(WorldPosition { pos })
@@ -23,13 +23,15 @@ pub enum TileType {
     Cobble,
 }
 
-pub fn tile(world: &mut World, tile_type: TileType, coords: Vec2<i32>) {
+pub fn tile(world: &mut World, tile_type: TileType, coords: Vec2<i32>, blocking: bool) {
     use TileType::*;
+
+    const TILE_COLLIDER_BUFFER: f32 = 2.0;
 
     let pos = coords * crate::TILE_SIZE as i32;
     let pos_f32 = Vec2::new(pos.x as f32, pos.y as f32);
 
-    world
+    let mut builder = world
         .create_entity()
         .with(Sprite {
             section: Rect::rect(
@@ -48,9 +50,19 @@ pub fn tile(world: &mut World, tile_type: TileType, coords: Vec2<i32>) {
             anchor: Vec2::new(16, 8),
             layer: 1,
         })
-        .with(WorldPosition { pos: pos_f32 })
-        .with(WorldCollider {
-            rect: Rect::square(pos.x, pos.y, crate::TILE_SIZE as i32),
-        })
-        .build();
+        .with(WorldPosition { pos: pos_f32 });
+
+    if blocking {
+        let coll_size = crate::TILE_SIZE as f32;
+        builder = builder.with(WorldCollider {
+            rect: Rect::square(
+                pos_f32.x - coll_size / 2.,
+                pos_f32.y - coll_size / 2.,
+                coll_size,
+            )
+            .expand(TILE_COLLIDER_BUFFER),
+        });
+    }
+
+    builder.build();
 }
