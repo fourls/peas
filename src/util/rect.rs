@@ -1,5 +1,7 @@
 use std::ops::Add;
 
+use super::Vec2;
+
 #[derive(Default, Clone, Copy, PartialEq, Eq)]
 pub struct Rect<T> {
     pub x: T,
@@ -10,8 +12,9 @@ pub struct Rect<T> {
 
 impl<T> Rect<T>
 where
-    T: Add<T>,
+    T: Add<Output = T>,
     T: Copy,
+    T: Ord,
 {
     pub fn rect(x: T, y: T, width: T, height: T) -> Self {
         Rect {
@@ -30,11 +33,11 @@ where
         self.x
     }
 
-    pub fn right(&self) -> <T as Add>::Output {
+    pub fn right(&self) -> T {
         self.x + self.width
     }
 
-    pub fn top(&self) -> <T as Add>::Output {
+    pub fn top(&self) -> T {
         self.y + self.height
     }
 
@@ -48,5 +51,12 @@ where
 
     pub fn size(&self) -> (T, T) {
         (self.width, self.height)
+    }
+
+    pub fn inside(&self, point: Vec2<T>) -> bool {
+        point.x >= self.left()
+            && point.y >= self.bottom()
+            && point.x <= self.right()
+            && point.y <= self.top()
     }
 }

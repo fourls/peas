@@ -31,6 +31,7 @@ fn setup_ecs() -> World {
     world.register::<Sprite>();
     world.register::<ScreenPosition>();
     world.register::<WorldPosition>();
+    world.register::<WorldCollider>();
 
     spawn::player(&mut world, (0, 0).into());
 
@@ -57,7 +58,7 @@ fn setup_ecs() -> World {
                     None => TileType::Grass,
                     Some(tile_type) => tile_type.clone(),
                 },
-                camera.tile_to_world(&pos),
+                pos,
             );
         }
     }

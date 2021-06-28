@@ -19,3 +19,25 @@ pub struct Sprite {
     pub anchor: Vec2<u32>,
     pub layer: u8,
 }
+
+#[derive(Component)]
+pub struct WorldCollider {
+    pub rect: Rect<i32>,
+}
+
+#[derive(Component)]
+pub struct Player {}
+
+pub enum ItemType {
+    Pea,
+    Pod,
+    Water,
+}
+
+#[derive(Component)]
+pub struct Item {
+    pub item_type: ItemType,
+}
+
+#[derive(Component)]
+pub struct InPlayerInventory {}

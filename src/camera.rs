@@ -1,7 +1,5 @@
 use crate::util::Vec2;
 
-const TILE_SIZE: i32 = 16;
-
 pub struct Camera {
     pub pos: Vec2<i32>,
     pub width: u32,
@@ -9,10 +7,6 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn tile_to_world(&self, pos: &Vec2<i32>) -> Vec2<i32> {
-        Vec2::new(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
-    }
-
     pub fn world_to_screen(&self, pos: &Vec2<i32>) -> Vec2<i32> {
         Vec2::new(pos.x - pos.y, (pos.x + pos.y) / 2)
     }

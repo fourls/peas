@@ -1,6 +1,5 @@
 use crate::components::*;
-use crate::util::Rect;
-use crate::util::Vec2;
+use crate::util::*;
 use specs::prelude::*;
 
 pub fn player(world: &mut World, pos: Vec2<i32>) {
@@ -23,8 +22,10 @@ pub enum TileType {
     Cobble,
 }
 
-pub fn tile(world: &mut World, tile_type: TileType, pos: Vec2<i32>) {
+pub fn tile(world: &mut World, tile_type: TileType, coords: Vec2<i32>) {
     use TileType::*;
+
+    let pos = coords * crate::TILE_SIZE as i32;
 
     world
         .create_entity()
@@ -46,5 +47,8 @@ pub fn tile(world: &mut World, tile_type: TileType, pos: Vec2<i32>) {
             layer: 1,
         })
         .with(WorldPosition { pos })
+        .with(WorldCollider {
+            rect: Rect::square(pos.x, pos.y, crate::TILE_SIZE as i32),
+        })
         .build();
 }
