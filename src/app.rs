@@ -22,7 +22,7 @@ use crow::{
 };
 use specs::prelude::*;
 
-const CLEAR_COLOR: (f32, f32, f32, f32) = (0.7, 0.7, 0.7, 1.0);
+const CLEAR_COLOR: (f32, f32, f32, f32) = (0.0, 0.0, 0.0, 1.0);
 const SCALE_FACTOR: u32 = 4;
 const CAMERA_WIDTH: u32 = 256;
 const CAMERA_HEIGHT: u32 = 192;
@@ -41,10 +41,12 @@ fn setup_ecs() -> World {
     world.register::<ScreenPosition>();
     world.register::<WorldPosition>();
     world.register::<WorldCollider>();
+    world.register::<GrowingCrop>();
 
     spawn::player(&mut world, Vec2::default());
+    spawn::crop(&mut world, Vec2::new(-1, -1));
 
-    const BOUNDS: i32 = 2;
+    const BOUNDS: i32 = 3;
 
     let mut tile_overrides: HashMap<Vec2<i32>, TileType> = HashMap::new();
     tile_overrides.insert(Vec2::new(2, 0), TileType::Cobble);
@@ -62,7 +64,13 @@ fn setup_ecs() -> World {
             let pos = Vec2::new(x, y);
 
             let tile_type = match tile_overrides.get(&pos) {
-                None => TileType::Grass,
+                None => {
+                    if x.abs() == BOUNDS || y.abs() == BOUNDS {
+                        TileType::Water
+                    } else {
+                        TileType::Grass
+                    }
+                }
                 Some(tile_type) => tile_type.clone(),
             };
 
@@ -178,16 +186,20 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
         let cam_pos =
             camera.screen_to_view(&camera.world_to_screen(&Vec2::new(pos.pos.x, pos.pos.y)));
 
+        let pos = Vec2::new(
+            (cam_pos.x - sprite.anchor.x as f32) * SCALE_FACTOR as f32,
+            (cam_pos.y - sprite.anchor.y as f32) * SCALE_FACTOR as f32,
+        );
+
+        let depth = depth_of(sprite, cam_pos.into());
+
         ctx.draw(
             &mut surf,
             &tex,
-            (
-                ((cam_pos.x - sprite.anchor.x as f32) * SCALE_FACTOR as f32) as i32,
-                ((cam_pos.y - sprite.anchor.y as f32) * SCALE_FACTOR as f32) as i32,
-            ),
+            (pos.x as i32, pos.y as i32),
             &DrawConfig {
                 scale: (SCALE_FACTOR, SCALE_FACTOR),
-                depth: Some((u8::MAX - sprite.layer) as f32 / u8::MAX as f32),
+                depth: Some(depth),
                 ..Default::default()
             },
         );
@@ -196,6 +208,17 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
     ctx.present(surf).unwrap();
 }
 
+fn depth_of(sprite: &Sprite, pos: Vec2<f32>) -> f32 {
+    let layer_norm = (10 - sprite.layer) as f32 / 10.;
+
+    const Y_LIMIT: f32 = 512.0;
+
+    let y_norm = pos.y.clamp(-Y_LIMIT, Y_LIMIT) / (2.0 * Y_LIMIT * 10.);
+
+    layer_norm + y_norm
+}
+
 fn systems(world: &mut World) {
     systems::PlayerMovementSystem::default().run_now(world);
+    systems::CropGrowthSystem::default().run_now(world);
 }

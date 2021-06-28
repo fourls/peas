@@ -13,7 +13,7 @@ pub struct WorldPosition {
     pub pos: Vec2<f32>,
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy)]
 pub struct Sprite {
     pub section: Rect<u32>,
     pub anchor: Vec2<u32>,
@@ -41,3 +41,12 @@ pub struct Item {
 
 #[derive(Component)]
 pub struct InPlayerInventory {}
+
+#[derive(Component)]
+pub struct GrowingCrop {
+    pub sprites: Vec<Sprite>,
+    pub num_stages: usize,
+    pub stage: usize,
+    pub time_until_next_stage: f32,
+    pub time_between_stages: Vec<f32>,
+}
