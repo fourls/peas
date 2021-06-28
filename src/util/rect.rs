@@ -1,5 +1,6 @@
 use std::ops::Add;
 
+#[derive(Default, Clone, Copy, PartialEq, Eq)]
 pub struct Rect<T> {
     pub x: T,
     pub y: T,

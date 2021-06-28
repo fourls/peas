@@ -1,23 +1,21 @@
 use specs::prelude::*;
 use specs_derive::Component;
 
-use crate::util::Rect;
+use crate::util::{Rect, Vec2};
 
 #[derive(Component, Default)]
-pub struct Position {
-    pub x: i32,
-    pub y: i32,
+pub struct ScreenPosition {
+    pub pos: Vec2<i32>,
 }
 
 #[derive(Component)]
-pub struct TilePosition {
-    pub x: i32,
-    pub y: i32,
+pub struct WorldPosition {
+    pub pos: Vec2<i32>,
 }
 
 #[derive(Component)]
 pub struct Sprite {
     pub section: Rect<u32>,
-    pub anchor: (u32, u32),
+    pub anchor: Vec2<u32>,
     pub layer: u8,
 }

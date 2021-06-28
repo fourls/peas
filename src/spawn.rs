@@ -1,20 +1,21 @@
 use crate::components::*;
 use crate::util::Rect;
+use crate::util::Vec2;
 use specs::prelude::*;
 
-pub fn player(world: &mut World, pos: (i32, i32)) {
+pub fn player(world: &mut World, pos: Vec2<i32>) {
     world
         .create_entity()
         .with(Sprite {
             section: Rect::square(32, 80, 16),
-            anchor: (8, 1),
+            anchor: Vec2::new(8, 3),
             layer: 5,
         })
-        .with(Position::default())
-        .with(TilePosition { x: pos.0, y: pos.1 })
+        .with(WorldPosition { pos })
         .build();
 }
 
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum TileType {
     Grass,
     Water,
@@ -22,7 +23,7 @@ pub enum TileType {
     Cobble,
 }
 
-pub fn tile(world: &mut World, tile_type: TileType, pos: (i32, i32)) {
+pub fn tile(world: &mut World, tile_type: TileType, pos: Vec2<i32>) {
     use TileType::*;
 
     world
@@ -41,10 +42,9 @@ pub fn tile(world: &mut World, tile_type: TileType, pos: (i32, i32)) {
                 32,
                 16,
             ),
-            anchor: (16, 8),
+            anchor: Vec2::new(16, 8),
             layer: 1,
         })
-        .with(Position::default())
-        .with(TilePosition { x: pos.0, y: pos.1 })
+        .with(WorldPosition { pos })
         .build();
 }
