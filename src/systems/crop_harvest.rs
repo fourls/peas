@@ -13,7 +13,7 @@ use crate::{
     util::Vec2,
 };
 
-const CROP_ITEM_RADIUS: f32 = (TILE_SIZE / 2) as f32;
+const CROP_ITEM_RADIUS: f32 = 5.0;
 const CROP_ITEM_VARIATION: f32 = 2.7;
 
 #[derive(Default)]
@@ -48,7 +48,7 @@ impl<'s> System<'s> for CropHarvestSystem {
                 return;
             }
 
-            if clickable.rect.inside(world_mouse) {
+            if clickable.rect.contains(world_mouse) {
                 let pos_vec = position.pos;
                 let crop_num_items = crop.num_items;
                 let crop_item_drop = crop.item_drop;

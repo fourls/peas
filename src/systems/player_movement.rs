@@ -48,7 +48,7 @@ impl<'s> System<'s> for PlayerMovementSystem {
             let mut safe = true;
 
             for (collider, _wall) in (&colliders, &walls).join() {
-                if collider.rect.inside(new_pos) {
+                if collider.rect.contains(new_pos) {
                     safe = false;
                     break;
                 }

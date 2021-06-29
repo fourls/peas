@@ -41,6 +41,7 @@ fn setup_ecs() -> World {
     world.register::<WorldClickable>();
     world.register::<Item>();
     world.register::<PreventsMovement>();
+    world.register::<InPlayerInventory>();
 
     spawn::player(&mut world, Vec2::default());
     spawn::crop(&mut world, Vec2::new(0, -1));
@@ -235,4 +236,6 @@ fn systems(world: &mut World) {
     systems::PlayerMovementSystem::default().run_now(world);
     systems::CropGrowthSystem::default().run_now(world);
     systems::CropHarvestSystem::default().run_now(world);
+    systems::ItemPickupSystem::default().run_now(world);
+    systems::ItemGravitateSystem::default().run_now(world);
 }
