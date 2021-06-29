@@ -1,13 +1,10 @@
 use std::collections::HashSet;
 
-use crow::glutin::dpi::LogicalPosition;
-use crow::glutin::event::ElementState as KeyState;
+use crow::glutin::{dpi::LogicalPosition, event::ElementState as KeyState};
 
-pub use crow::glutin::event::MouseButton;
-pub use crow::glutin::event::VirtualKeyCode as Key;
+pub use crow::glutin::event::{MouseButton, VirtualKeyCode as Key};
 
-use crate::constants::VIEW_HEIGHT;
-use crate::util::Vec2;
+use crate::{constants::VIEW_HEIGHT, util::Vec2};
 
 #[derive(Default, Debug)]
 pub struct Input {

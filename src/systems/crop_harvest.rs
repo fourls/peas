@@ -5,10 +5,8 @@ use rand::Rng;
 use specs::prelude::*;
 
 use crate::{
-    camera::Camera,
-    components::{GrowingCrop, ItemType, WorldClickable, WorldPosition},
-    constants::TILE_SIZE,
-    input::{Input, MouseButton},
+    components::{GrowingCrop, WorldClickable, WorldPosition},
+    resources::{input::MouseButton, Camera, Input},
     spawn,
     util::Vec2,
 };
@@ -39,8 +37,6 @@ impl<'s> System<'s> for CropHarvestSystem {
 
         let world_mouse = camera.screen_to_world_pp(&camera.view_to_screen_pp(&input.mouse_pos()));
         let world_mouse = Vec2::new(world_mouse.x as f32, world_mouse.y as f32);
-
-        let mut to_remove: Vec<Entity> = vec![];
 
         for (e, crop, position, clickable) in (&entities, &crops, &positions, &clickables).join() {
             // ignore all crops that are not fully grown

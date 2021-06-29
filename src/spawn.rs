@@ -13,6 +13,10 @@ pub fn player(world: &mut World, pos: Vec2<f32>) {
             layer: 5,
         })
         .with(WorldPosition { pos })
+        .with(Velocity {
+            collides: true,
+            vel: Vec2::default(),
+        })
         .build();
 }
 
@@ -144,5 +148,9 @@ pub fn item(world: &mut World, item_type: ItemType, pos: Vec2<f32>) {
             layer: 5,
         })
         .with(Item { item_type })
+        .with(Velocity {
+            collides: false,
+            vel: Vec2::default(),
+        })
         .build();
 }

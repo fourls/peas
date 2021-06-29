@@ -4,10 +4,9 @@ use std::{
 };
 
 use crate::{
-    camera::Camera,
     components::*,
     constants::*,
-    input::Input,
+    resources::{Camera, Input},
     spawn::{self, TileType},
     systems,
     util::Vec2,
@@ -42,6 +41,7 @@ fn setup_ecs() -> World {
     world.register::<Item>();
     world.register::<PreventsMovement>();
     world.register::<InPlayerInventory>();
+    world.register::<Velocity>();
 
     spawn::player(&mut world, Vec2::default());
     spawn::crop(&mut world, Vec2::new(0, -1));
@@ -238,4 +238,5 @@ fn systems(world: &mut World) {
     systems::CropHarvestSystem::default().run_now(world);
     systems::ItemPickupSystem::default().run_now(world);
     systems::ItemGravitateSystem::default().run_now(world);
+    systems::VelocitySystem::default().run_now(world);
 }

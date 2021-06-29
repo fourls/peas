@@ -8,3 +8,5 @@ mod item_pickup;
 pub use item_pickup::*;
 mod item_gravitate;
 pub use item_gravitate::*;
+mod velocity;
+pub use velocity::*;

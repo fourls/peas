@@ -17,6 +17,7 @@ pub struct WorldPosition {
 pub struct Sprite {
     pub section: Rect<u32>,
     pub anchor: Vec2<u32>,
+    /// The sorting layer of the sprite. Must be in the range 1..10
     pub layer: u8,
 }
 
@@ -60,4 +61,10 @@ pub struct GrowingCrop {
     pub time_between_stages: Vec<f32>,
     pub item_drop: ItemType,
     pub num_items: usize,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct Velocity {
+    pub vel: Vec2<f32>,
+    pub collides: bool,
 }

@@ -3,9 +3,9 @@ use std::time::Duration;
 use specs::prelude::*;
 
 use crate::{
-    components::{Player, PreventsMovement, WorldCollider, WorldPosition},
+    components::{Player, PreventsMovement, Velocity, WorldCollider, WorldPosition},
     constants::PLAYER_SPEED,
-    input::{Input, Key},
+    resources::{input::Key, Input},
     util::Vec2,
 };
 
@@ -17,15 +17,15 @@ impl<'s> System<'s> for PlayerMovementSystem {
         ReadExpect<'s, Input>,
         ReadExpect<'s, Duration>,
         ReadStorage<'s, Player>,
-        WriteStorage<'s, WorldPosition>,
+        WriteStorage<'s, Velocity>,
         ReadStorage<'s, WorldCollider>,
         ReadStorage<'s, PreventsMovement>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (input, delta, players, mut positions, colliders, walls) = data;
+        let (input, delta, players, mut velocities, colliders, walls) = data;
 
-        for (_player, position) in (&players, &mut positions).join() {
+        for (_player, velocity) in (&players, &mut velocities).join() {
             let mut axis: Vec2<f32> = Vec2::default();
 
             if input.is_down(Key::W) {
@@ -43,20 +43,7 @@ impl<'s> System<'s> for PlayerMovementSystem {
 
             axis.normalize();
 
-            let new_pos: Vec2<f32> = position.pos + axis * PLAYER_SPEED * delta.as_secs_f32();
-
-            let mut safe = true;
-
-            for (collider, _wall) in (&colliders, &walls).join() {
-                if collider.rect.contains(new_pos) {
-                    safe = false;
-                    break;
-                }
-            }
-
-            if safe {
-                position.pos = new_pos;
-            }
+            velocity.vel = axis * PLAYER_SPEED;
         }
     }
 }

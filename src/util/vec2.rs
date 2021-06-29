@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 use cgmath::{num_traits::Num, AbsDiffEq};
 
@@ -110,5 +110,41 @@ where
             x: self.x / rhs,
             y: self.y / rhs,
         }
+    }
+}
+
+impl<T> AddAssign for Vec2<T>
+where
+    T: Num + Copy,
+{
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
+    }
+}
+
+impl<T> SubAssign for Vec2<T>
+where
+    T: Num + Copy,
+{
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = *self - rhs;
+    }
+}
+
+impl<T> MulAssign<T> for Vec2<T>
+where
+    T: Num + Copy,
+{
+    fn mul_assign(&mut self, rhs: T) {
+        *self = *self * rhs;
+    }
+}
+
+impl<T> DivAssign<T> for Vec2<T>
+where
+    T: Num + Copy,
+{
+    fn div_assign(&mut self, rhs: T) {
+        *self = *self / rhs;
     }
 }
