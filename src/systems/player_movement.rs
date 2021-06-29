@@ -3,7 +3,8 @@ use std::time::Duration;
 use specs::prelude::*;
 
 use crate::{
-    components::{Player, WorldCollider, WorldPosition},
+    components::{Player, PreventsMovement, WorldCollider, WorldPosition},
+    constants::PLAYER_SPEED,
     input::{Input, Key},
     util::Vec2,
 };
@@ -18,10 +19,11 @@ impl<'s> System<'s> for PlayerMovementSystem {
         ReadStorage<'s, Player>,
         WriteStorage<'s, WorldPosition>,
         ReadStorage<'s, WorldCollider>,
+        ReadStorage<'s, PreventsMovement>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (input, delta, players, mut positions, colliders) = data;
+        let (input, delta, players, mut positions, colliders, walls) = data;
 
         for (_player, position) in (&players, &mut positions).join() {
             let mut axis: Vec2<f32> = Vec2::default();
@@ -41,12 +43,11 @@ impl<'s> System<'s> for PlayerMovementSystem {
 
             axis.normalize();
 
-            let new_pos: Vec2<f32> =
-                position.pos + axis * crate::PLAYER_SPEED * delta.as_secs_f32();
+            let new_pos: Vec2<f32> = position.pos + axis * PLAYER_SPEED * delta.as_secs_f32();
 
             let mut safe = true;
 
-            for collider in (&colliders).join() {
+            for (collider, _wall) in (&colliders, &walls).join() {
                 if collider.rect.inside(new_pos) {
                     safe = false;
                     break;

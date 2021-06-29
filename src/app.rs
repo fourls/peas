@@ -6,6 +6,7 @@ use std::{
 use crate::{
     camera::Camera,
     components::*,
+    constants::*,
     input::Input,
     spawn::{self, TileType},
     systems,
@@ -13,27 +14,22 @@ use crate::{
 };
 use crow::{
     glutin::{
-        dpi::LogicalSize,
+        dpi::{LogicalPosition, LogicalSize},
         event::{Event, WindowEvent},
-        event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
+        event_loop::{ControlFlow, EventLoop},
         window::WindowBuilder,
     },
     Context, DrawConfig, Texture,
 };
 use specs::prelude::*;
 
-const CLEAR_COLOR: (f32, f32, f32, f32) = (0.0, 0.0, 0.0, 1.0);
-const SCALE_FACTOR: u32 = 4;
-const CAMERA_WIDTH: u32 = 256;
-const CAMERA_HEIGHT: u32 = 192;
-
 fn setup_ecs() -> World {
     let mut world = World::new();
 
     let camera = Camera {
-        pos: Vec2::new(-(CAMERA_WIDTH as i32) / 2, -(CAMERA_HEIGHT as i32) / 2),
-        width: CAMERA_WIDTH,
-        height: CAMERA_HEIGHT,
+        pos: Vec2::new(-(VIEW_WIDTH as i32) / 2, -(VIEW_HEIGHT as i32) / 2),
+        width: VIEW_WIDTH,
+        height: VIEW_HEIGHT,
     };
 
     world.register::<Sprite>();
@@ -42,9 +38,14 @@ fn setup_ecs() -> World {
     world.register::<WorldPosition>();
     world.register::<WorldCollider>();
     world.register::<GrowingCrop>();
+    world.register::<WorldClickable>();
+    world.register::<Item>();
+    world.register::<PreventsMovement>();
 
     spawn::player(&mut world, Vec2::default());
+    spawn::crop(&mut world, Vec2::new(0, -1));
     spawn::crop(&mut world, Vec2::new(-1, -1));
+    spawn::crop(&mut world, Vec2::new(1, -1));
 
     const BOUNDS: i32 = 3;
 
@@ -97,8 +98,8 @@ pub fn run() -> Result<(), crow::Error> {
     let event_loop = EventLoop::new();
     let mut ctx = Context::new(
         WindowBuilder::new().with_inner_size(LogicalSize::new(
-            CAMERA_WIDTH * SCALE_FACTOR,
-            CAMERA_HEIGHT * SCALE_FACTOR,
+            VIEW_WIDTH * SCALE_FACTOR,
+            VIEW_HEIGHT * SCALE_FACTOR,
         )),
         &event_loop,
     )?;
@@ -114,16 +115,28 @@ pub fn run() -> Result<(), crow::Error> {
                 event: WindowEvent::CloseRequested,
                 ..
             } => *control_flow = ControlFlow::Exit,
-            Event::WindowEvent {
-                event: WindowEvent::KeyboardInput { input, .. },
-                ..
-            } => {
-                if let Some(key) = input.virtual_keycode {
-                    let state = input.state;
+            Event::WindowEvent { event, window_id } if window_id == ctx.window().id() => {
+                match event {
+                    WindowEvent::KeyboardInput { input, .. } => {
+                        if let Some(key) = input.virtual_keycode {
+                            let mut input_res = ecs.write_resource::<Input>();
 
-                    let mut input_res = ecs.write_resource::<Input>();
+                            input_res.process_keyboard_input(key, input.state);
+                        }
+                    }
+                    WindowEvent::MouseInput { button, state, .. } => {
+                        let mut input_res = ecs.write_resource::<Input>();
 
-                    input_res.process_event(key, state);
+                        input_res.process_mouse_input(button, state);
+                    }
+                    WindowEvent::CursorMoved { position, .. } => {
+                        let size =
+                            LogicalPosition::<i32>::from_physical(position, SCALE_FACTOR as f64);
+
+                        let mut input_res = ecs.write_resource::<Input>();
+                        input_res.process_cursor_moved(size);
+                    }
+                    _ => {}
                 }
             }
             Event::MainEventsCleared => ctx.window().request_redraw(),
@@ -221,4 +234,5 @@ fn depth_of(sprite: &Sprite, pos: Vec2<f32>) -> f32 {
 fn systems(world: &mut World) {
     systems::PlayerMovementSystem::default().run_now(world);
     systems::CropGrowthSystem::default().run_now(world);
+    systems::CropHarvestSystem::default().run_now(world);
 }

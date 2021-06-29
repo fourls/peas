@@ -21,13 +21,22 @@ pub struct Sprite {
 }
 
 #[derive(Component)]
+pub struct PreventsMovement {}
+
+#[derive(Component)]
 pub struct WorldCollider {
+    pub rect: Rect<f32>,
+}
+
+#[derive(Component)]
+pub struct WorldClickable {
     pub rect: Rect<f32>,
 }
 
 #[derive(Component)]
 pub struct Player {}
 
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum ItemType {
     Pea,
     Pod,
@@ -49,4 +58,6 @@ pub struct GrowingCrop {
     pub stage: usize,
     pub time_until_next_stage: f32,
     pub time_between_stages: Vec<f32>,
+    pub item_drop: ItemType,
+    pub num_items: usize,
 }
