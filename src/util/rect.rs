@@ -1,10 +1,8 @@
-use std::ops::{Add, Mul, Sub};
-
-use cgmath::num_traits::Num;
-
 use super::Vec2;
+use cgmath::num_traits::Num;
+use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct Rect<T>
 where
     T: Num + Copy,

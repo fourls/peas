@@ -5,6 +5,7 @@ use std::{
 
 use crate::{
     components::*,
+    config::{CropId, GameConfig, Sprite},
     constants::*,
     resources::{Camera, Input},
     spawn::{self, TileType},
@@ -31,7 +32,7 @@ fn setup_ecs() -> World {
         height: VIEW_HEIGHT,
     };
 
-    world.register::<Sprite>();
+    world.register::<Renderable>();
     world.register::<Player>();
     world.register::<ScreenPosition>();
     world.register::<WorldPosition>();
@@ -44,9 +45,9 @@ fn setup_ecs() -> World {
     world.register::<Velocity>();
 
     spawn::player(&mut world, Vec2::default());
-    spawn::crop(&mut world, Vec2::new(0, -1));
-    spawn::crop(&mut world, Vec2::new(-1, -1));
-    spawn::crop(&mut world, Vec2::new(1, -1));
+    spawn::crop(&mut world, CropId::Pea, Vec2::new(0, -1));
+    spawn::crop(&mut world, CropId::Pea, Vec2::new(-1, -1));
+    spawn::crop(&mut world, CropId::Pea, Vec2::new(1, -1));
 
     const BOUNDS: i32 = 3;
 
@@ -171,10 +172,12 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
     ctx.clear_color(&mut surf, CLEAR_COLOR);
 
     let camera = world.read_resource::<Camera>();
-    let sprites = world.read_storage::<Sprite>();
+    let sprites = world.read_storage::<Renderable>();
     let screen_positions = world.read_storage::<ScreenPosition>();
 
-    for (sprite, pos) in (&sprites, &screen_positions).join() {
+    for (renderable, pos) in (&sprites, &screen_positions).join() {
+        let sprite = &renderable.sprite;
+
         let tex = spritesheet.get_section(sprite.section.pos(), sprite.section.size());
 
         let cam_x = pos.pos.x - sprite.anchor.x as i32 + camera.pos.x;
@@ -194,7 +197,8 @@ fn draw(ctx: &mut Context, spritesheet: &Texture, world: &World) {
 
     let world_positions = world.read_storage::<WorldPosition>();
 
-    for (sprite, pos) in (&sprites, &world_positions).join() {
+    for (renderable, pos) in (&sprites, &world_positions).join() {
+        let sprite = &renderable.sprite;
         let tex = spritesheet.get_section(sprite.section.pos(), sprite.section.size());
 
         let cam_pos =

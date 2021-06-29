@@ -1,0 +1,58 @@
+GameConfig(
+    items: {},
+    crops: {
+        Pea: CropSpeciesConfig(
+            item_drop: Pea,
+            num_items: 3,
+            num_stages: 4,
+            time_between_stages: [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            sprites: [
+                Sprite(
+                    section: Rect(
+                        x: 96,
+                        y: 96,
+                        width: 32,
+                        height: 32
+                    ),
+                    anchor: Vec2(x: 16, y: 8),
+                    layer: 5,
+                ),
+                Sprite(
+                    section: Rect(
+                        x: 96,
+                        y: 64,
+                        width: 32,
+                        height: 32
+                    ),
+                    anchor: Vec2(x: 16, y: 8),
+                    layer: 5,
+                ),
+                Sprite(
+                    section: Rect(
+                        x: 96,
+                        y: 32,
+                        width: 32,
+                        height: 32
+                    ),
+                    anchor: Vec2(x: 16, y: 8),
+                    layer: 5,
+                ),
+                Sprite(
+                    section: Rect(
+                        x: 96,
+                        y: 0,
+                        width: 32,
+                        height: 32
+                    ),
+                    anchor: Vec2(x: 16, y: 8),
+                    layer: 5,
+                ),
+            ],
+        )
+    }
+)

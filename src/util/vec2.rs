@@ -1,8 +1,8 @@
+use cgmath::{num_traits::Num, AbsDiffEq};
+use serde::{Deserialize, Serialize};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-use cgmath::{num_traits::Num, AbsDiffEq};
-
-#[derive(Default, PartialEq, Eq, Clone, Copy, Hash, Debug)]
+#[derive(Default, PartialEq, Eq, Clone, Copy, Hash, Debug, Serialize, Deserialize)]
 pub struct Vec2<T>
 where
     T: Num + Copy,

@@ -4,6 +4,7 @@ use rand::prelude::ThreadRng;
 use rand::Rng;
 use specs::prelude::*;
 
+use crate::config::CONFIG;
 use crate::{
     components::{GrowingCrop, WorldClickable, WorldPosition},
     resources::{input::MouseButton, Camera, Input},
@@ -40,14 +41,14 @@ impl<'s> System<'s> for CropHarvestSystem {
 
         for (e, crop, position, clickable) in (&entities, &crops, &positions, &clickables).join() {
             // ignore all crops that are not fully grown
-            if crop.stage + 1 != crop.num_stages {
+            if crop.stage + 1 != CONFIG.crops[&crop.species].num_stages {
                 return;
             }
 
             if clickable.rect.contains(world_mouse) {
                 let pos_vec = position.pos;
-                let crop_num_items = crop.num_items;
-                let crop_item_drop = crop.item_drop;
+                let crop_num_items = CONFIG.crops[&crop.species].num_items;
+                let crop_item_drop = CONFIG.crops[&crop.species].item_drop;
 
                 update.exec(move |world| {
                     world.delete_entity(e).expect("Could not delete entity");
